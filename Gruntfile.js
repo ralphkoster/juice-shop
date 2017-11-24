@@ -105,6 +105,10 @@ module.exports = function (grunt) {
           to: '<%= pkg.version %>'
         }]
       }
+    },
+
+    nsp: {
+        package: grunt.file.readJSON('package.json')
     }
   })
 
@@ -114,6 +118,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-uglify')
   grunt.loadNpmTasks('grunt-contrib-compress')
   grunt.loadNpmTasks('grunt-text-replace')
+  grunt.loadNpmTasks('grunt-nsp')
 
   grunt.registerTask('minify', [ 'clean:dist', 'concat:js', 'uglify:js', 'ngtemplates:juiceShop', 'concat:dist', 'uglify:dist', 'clean:temp' ])
   grunt.registerTask('package', [ 'clean:pckg', 'minify', 'compress:pckg' ])
