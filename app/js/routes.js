@@ -71,10 +71,6 @@ angular.module('juiceShop').config(['$routeProvider', function ($routeProvider) 
     controller: 'OAuthController'
   })
 
-  $routeProvider.when('/c3f37d6cca002c9641f1ae189c53bc86aa0b509f48406de25ef10c83bd0f062c.txt', {
-      templateUrl: 'views/c3f37d6cca002c9641f1ae189c53bc86aa0b509f48406de25ef10c83bd0f062c.txt'
-  })
-
-    /* default route */
+  /* default route */
   $routeProvider.otherwise({redirectTo: '/search'})
 }])

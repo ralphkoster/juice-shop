@@ -109,6 +109,7 @@ app.use('/encryptionkeys', serveIndex('encryptionkeys', { 'icons': true, 'view':
 app.use('/encryptionkeys/:file', keyServer())
 
 app.use(express.static(applicationRoot + '/app'))
+app.use(express.static('./public'))
 app.use(cookieParser('kekse'))
 app.use(bodyParser.json())
 
