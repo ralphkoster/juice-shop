@@ -78,3 +78,5 @@ angular.module('juiceShop').filter('emailName', function () {
     return email.split('@')[0].split('.').join(' ')
   }
 })
+
+
