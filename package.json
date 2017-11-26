@@ -82,7 +82,6 @@
     "chai": "~4",
     "codeclimate-test-reporter": "~0.5",
     "cross-spawn": "~5.1",
-    "eslint-plugin-security": "^1.4.0",
     "form-data": "~2.2",
     "frisby": "~2.0",
     "grunt-nsp": "^2.3.1",
