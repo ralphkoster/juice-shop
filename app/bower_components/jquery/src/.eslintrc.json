@@ -1,0 +1,11 @@
+{
+	"root": true,
+
+	"plugins": [
+		"security"
+	],
+	"extends": [
+		"../.eslintrc-browser.json",
+		"plugin:security/recommended"
+	]
+}

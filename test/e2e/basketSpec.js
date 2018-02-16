@@ -7,14 +7,14 @@ describe('/#/basket', () => {
 
     describe('challenge "negativeOrder"', () => {
       it('should be possible to update a basket to a negative quantity via the Rest API', () => {
-        browser.ignoreSynchronization = true
+        browser.waitForAngularEnabled(false)
         browser.executeScript('var $http = angular.injector([\'juiceShop\']).get(\'$http\'); $http.put(\'/api/BasketItems/1\', {quantity: -100000});')
         browser.driver.sleep(1000)
+        browser.waitForAngularEnabled(true)
 
         browser.get('/#/basket')
-        browser.ignoreSynchronization = false
 
-        const productQuantities = element.all(by.repeater('product in products').column('basketItem.quantity'))
+        const productQuantities = element.all(by.repeater('product in products').column('BasketItem.quantity'))
         expect(productQuantities.first().getText()).toMatch(/-100000/)
       })
 
@@ -26,7 +26,7 @@ describe('/#/basket', () => {
     })
 
     describe('challenge "accessBasket"', () => {
-      it('should access basket with id from cookie instead of the one associated to logged-in user', () => {
+      it('should access basket with id from session storage instead of the one associated to logged-in user', () => {
         browser.executeScript('window.sessionStorage.bid = 3;')
 
         browser.get('/#/basket')
@@ -47,6 +47,8 @@ describe('/#/basket', () => {
       })
 
       it('should be possible to enter a coupon that gives an 80% discount', () => {
+        browser.executeScript('window.localStorage.couponPanelExpanded = false;')
+
         browser.get('/#/basket')
         element(by.id('collapseCouponButton')).click()
         browser.wait(protractor.ExpectedConditions.presenceOf($('#coupon')), 5000, 'Coupon textfield not present.') // eslint-disable-line no-undef

@@ -23,7 +23,7 @@ describe('/api/Feedbacks', () => {
         rating: 1
       }
     })
-      .expect('status', 200)
+      .expect('status', 201)
       .expect('json', 'data', {
         comment: 'I am a harmless comment.'
       })
@@ -34,13 +34,13 @@ describe('/api/Feedbacks', () => {
     frisby.post(API_URL + '/Feedbacks', {
       headers: jsonHeader,
       body: {
-        comment: 'The sanitize-html module up to at least version 1.4.2 has this issue: <<script>alert("XSS4")</script>script>alert("XSS4")<</script>/script>',
+        comment: 'The sanitize-html module up to at least version 1.4.2 has this issue: <<script>alert("XSS")</script>script>alert("XSS")<</script>/script>',
         rating: 1
       }
     })
-      .expect('status', 200)
+      .expect('status', 201)
       .expect('json', 'data', {
-        comment: 'The sanitize-html module up to at least version 1.4.2 has this issue: <script>alert("XSS4")</script>'
+        comment: 'The sanitize-html module up to at least version 1.4.2 has this issue: <script>alert("XSS")</script>'
       })
       .done(done)
   })
@@ -54,27 +54,28 @@ describe('/api/Feedbacks', () => {
         UserId: 3
       }
     })
-      .expect('status', 200)
+      .expect('status', 201)
       .expect('header', 'content-type', /application\/json/)
       .expect('json', 'data', {
         UserId: 3
       }).done(done)
   })
 
-  it('POST feedback in a non-existing users name as anonymous user', done => {
+  it('POST feedback in a non-existing users name as anonymous user fails with constraint error', done => {
     frisby.post(API_URL + '/Feedbacks', {
       headers: jsonHeader,
       body: {
-        comment: 'You suck! Stupid JWT secret "' + insecurity.defaultSecret + '" and being typosquatted by epilogue-js and angular-tooltipps!',
+        comment: 'Your express-jwt 0.1.3 has some serious problems!',
         rating: 0,
         UserId: 4711
       }
     })
-      .expect('status', 200)
+      .expect('status', 500)
       .expect('header', 'content-type', /application\/json/)
-      .expect('json', 'data', {
-        UserId: 4711
-      }).done(done)
+      .then(res => {
+        expect(res.json.errors).toContain('SQLITE_CONSTRAINT: FOREIGN KEY constraint failed')
+      })
+      .done(done)
   })
 
   it('POST feedback is associated with current user', done => {
@@ -89,12 +90,12 @@ describe('/api/Feedbacks', () => {
       .then(res => frisby.post(API_URL + '/Feedbacks', {
         headers: { 'Authorization': 'Bearer ' + res.json.authentication.token, 'content-type': 'application/json' },
         body: {
-          comment: 'Bjoern\'s choice award!',
+          comment: 'Stupid JWT secret "' + insecurity.defaultSecret + '" and being typosquatted by epilogue-js and angular-tooltipps!',
           rating: 5,
           UserId: 4
         }
       })
-      .expect('status', 200)
+      .expect('status', 201)
       .expect('header', 'content-type', /application\/json/)
       .expect('json', 'data', {
         UserId: 4
@@ -119,7 +120,7 @@ describe('/api/Feedbacks', () => {
           UserId: 3
         }
       })
-      .expect('status', 200)
+      .expect('status', 201)
       .expect('header', 'content-type', /application\/json/)
       .expect('json', 'data', {
         UserId: 3
@@ -127,14 +128,26 @@ describe('/api/Feedbacks', () => {
       .done(done)
   })
 
-  it('POST feedback can be created without actually supplying data', done => {
-    frisby.post(API_URL + '/Feedbacks', { headers: jsonHeader, body: {} })
-      .expect('status', 200)
+  it('POST feedback can be created without actually supplying comment', done => {
+    frisby.post(API_URL + '/Feedbacks', { headers: jsonHeader, body: { rating: 1 } })
+      .expect('status', 201)
       .expect('header', 'content-type', /application\/json/)
-      .expect('jsonTypes', 'data', {
-        comment: Joi.any().allow('undefined'),
-        rating: Joi.any().forbidden(),
-        UserId: Joi.any().forbidden()
+      .expect('json', 'data', {
+        comment: null,
+        rating: 1
+      })
+      .done(done)
+  })
+
+  it('POST feedback cannot be created without actually supplying rating', done => {
+    frisby.post(API_URL + '/Feedbacks', { headers: jsonHeader, body: { } })
+      .expect('status', 400)
+      .expect('header', 'content-type', /application\/json/)
+      .expect('jsonTypes', {
+        message: Joi.string()
+      })
+      .then(res => {
+        expect(res.json.message.match(/notNull Violation: (Feedback\.)?rating cannot be null/))
       })
       .done(done)
   })
@@ -191,7 +204,7 @@ describe('/api/Feedbacks/:id', () => {
         rating: 1
       }
     })
-      .expect('status', 200)
+      .expect('status', 201)
       .expect('jsonTypes', 'data', { id: Joi.number() })
       .then(res => {
         frisby.del(API_URL + '/Feedbacks/' + res.json.data.id, { headers: authHeader })
